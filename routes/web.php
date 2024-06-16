@@ -9,6 +9,6 @@ Route::get('/', function () {
 });
 
 
-Route::post('/generateHeroes', [ArenaController::class, 'generateHeroes']);
-Route::get('/generateHeroes/{num}', [ArenaController::class, 'generateHeroes']);
+Route::post('/generateHeroes', [ArenaController::class, 'generateHeroesPost']);
+Route::get('/generateHeroes/{num}', [ArenaController::class, 'generateHeroesGet']);
 Route::get('/battle/{arenaId}', [ArenaController::class, 'battle']);

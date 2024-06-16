@@ -15,8 +15,25 @@ class ArenaController extends Controller
     const RESULT_DEFENDER_DIES = "defender dies";
 
 
+
+    public function generateHeroesPost(Request $request)
+    {
+        return $this->generateHeroes($request->input('num'));
+    }
+
+
+    public function generateHeroesGet($num)
+    {
+        return $this->generateHeroes($num);
+    }
+
+
+
     public function generateHeroes($numHeroes)
     {
+        if ($numHeroes === null || $numHeroes <= 0) {
+            return response()->json(['error' => 'Number of heroes is required and must be greater than zero'], 400);
+        }
 
         $arena = Arena::create();
 
@@ -51,35 +68,56 @@ class ArenaController extends Controller
             $attacker = $heroes->shift();
             $defender = $heroes->shift();
 
-            $round['attacker'] = $attacker->type;
-            $round['defender'] = $defender->type;
-            $round['result'] = 'nothing';
+            $round[self::ATTACKER] = $attacker->type;
+            $round[self::DEFENDER] = $defender->type;
+            $round[self::RESULT] = 'nothing';
 
+
+            // Because the variations num low, I choose else. Otherwise I choose Switch
             if ($attacker->type == Hero::TYPE_ARCHER) {
                 if ($defender->type == Hero::TYPE_CHILVARY) {
+                    // if Attacker is ARCHER, and Defender is Chilvary, the defender 40% chance to DIE
                     if (rand(0, 100) < 40) {
-                        $round['result'] = self::RESULT_DEFENDER_DIES;
+                        $round[self::RESULT] = self::RESULT_DEFENDER_DIES;
                         $defender->health = 0;
                     }
                 } elseif ($defender->type == Hero::TYPE_SWORDSMAN || $defender->type == Hero::TYPE_ARCHER) {
-                    $round['result'] = self::RESULT_DEFENDER_DIES;
+                    $round[self::RESULT] = self::RESULT_DEFENDER_DIES;
                     $defender->health = 0;
                 }
+
+                // switch case
+                // switch ($defender->type)
+                // {
+                //     case Hero::TYPE_CHILVARY :
+                //         if (rand(0, 100) < 40) {
+                //             $round[self::RESULT] = self::RESULT_DEFENDER_DIES;
+                //             $defender->health = 0;
+                //         }
+                //         break;
+                //     // if defender is swordsman or archer
+                //     default:
+                //         $round[self::RESULT] = self::RESULT_DEFENDER_DIES;
+                //         $defender->health = 0;
+                //         break;
+                //     }
+
+
             } elseif ($attacker->type == Hero::TYPE_SWORDSMAN) {
                 if ($defender->type == Hero::TYPE_CHILVARY) {
-                    $round['result'] = 'nothing';
+                    $round[self::RESULT] = 'nothing';
                 } elseif ($defender->type == Hero::TYPE_SWORDSMAN || $defender->type == Hero::TYPE_ARCHER) {
-                    $round['result'] = self::RESULT_DEFENDER_DIES;
+                    $round[self::RESULT] = self::RESULT_DEFENDER_DIES;
                     $defender->health = 0;
                 }
             } elseif ($attacker->type == Hero::TYPE_CHILVARY) {
                 if ($defender->type == Hero::TYPE_CHILVARY || $defender->type == Hero::TYPE_SWORDSMAN || $defender->type == Hero::TYPE_ARCHER) {
-                    $round['result'] = self::RESULT_DEFENDER_DIES;
+                    $round[self::RESULT] = self::RESULT_DEFENDER_DIES;
                     $defender->health = 0;
                 }
             }
 
-            if ($round['result'] == self::RESULT_DEFENDER_DIES) {
+            if ($round[self::RESULT] == self::RESULT_DEFENDER_DIES) {
                 $defender->save();
             }
 
